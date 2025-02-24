@@ -3,7 +3,7 @@ name = "bookshelf"
 version = "0.1.0"
 description = "REST API Сервис библиотеки, выполненный в рамках тестового задания от 'DNS Teхнологии'"
 authors = [
-    {name = "Oidaho <oidaho.main@yandex.ru>"}
+    {name = "Oidaho", email = "oidaho.main@yandex.ru"}
 ]
 readme = "README.md"
 requires-python = ">=3.13"
