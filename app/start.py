@@ -1,5 +1,5 @@
 import uvicorn
-from app.configs import configs
+from configs import configs
 
 if __name__ == "__main__":
     uvicorn.run(

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from .health import health_router
+from .health import router as health_router
 
 router = APIRouter(prefix="/v1")
 
