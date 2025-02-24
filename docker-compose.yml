@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  bookshelf:
+    container_name: bookshelf
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "6177:6177"
+    env_file:
+      - .env
+    networks:
+      internal:
+        ipv4_address: 172.20.0.5
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6177/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+networks:
+  internal:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24

@@ -1,6 +1,7 @@
 # Meta
 .gitignore
 poetry.lock
+.env
 
 # Docs
 LICENSE

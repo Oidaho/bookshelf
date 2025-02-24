@@ -11,7 +11,8 @@ docs/_build/
 poetry.lock
 
 # Environments
-.env
+# .env - продакшн версия, например
+.env.dev
 .venv
 env/
 venv/
