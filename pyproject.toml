@@ -8,9 +8,24 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "fastapi (>=0.115.8,<0.116.0)",
+    "uvicorn (>=0.34.0,<0.35.0)",
+    "sqlalchemy[asyncio] (>=2.0.38,<3.0.0)",
+    "asyncpg (>=0.30.0,<0.31.0)",
+    "pydantic (>=2.10.6,<3.0.0)",
+    "pydantic-settings (>=2.8.0,<3.0.0)",
+    "alembic (>=1.14.1,<2.0.0)"
 ]
 
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.3.4"
+
+
+[tool.poetry.group.dev.dependencies]
+aiosqlite = "^0.21.0"
+
