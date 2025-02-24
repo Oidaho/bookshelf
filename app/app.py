@@ -9,7 +9,7 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    # После включения
+    # После выключения
 
 
 app = FastAPI(lifespan=lifespan)
