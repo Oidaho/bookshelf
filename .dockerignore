@@ -1,0 +1,10 @@
+# Meta
+.gitignore
+poetry.lock
+
+# Docs
+LICENSE
+README.md
+
+# Folders
+./.vscode
