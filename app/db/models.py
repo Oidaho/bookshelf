@@ -68,6 +68,7 @@ class Book(BaseORM):
 
     publisher = relationship("Publisher", back_populates="books")
     author = relationship("Author", back_populates="books")
+    issuances = relationship("Issuance", back_populates="book")
 
     __table_args__ = (
         Index("books_code_idx", code, postgresql_using="hash"),
