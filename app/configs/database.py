@@ -13,15 +13,18 @@ class DatabaseConfiguration(BaseSettings):
     POSTGRES_NAME: str = "book_fund"
     POSTGRES_PORT: int = 5432
 
-    def __init__(self, debug: bool) -> None:
-        super().__init__()
-        self.debug = debug
+    # ! Служебное
+    __debug: bool = False
+
+    def __init__(self, debug: bool, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.__debug = debug
 
     @property
     def DATABASE_URL(self) -> str:
         # Через format читабильнее
-        if self.debug:
-            return "sqlite+aiosqlite:///{db_name}".format(db_name=self.POSTGRES_NAME)
+        if self.__debug:
+            return "sqlite+aiosqlite:///{db_name}.db".format(db_name=self.POSTGRES_NAME)
 
         return "postgresql+asyncpg://{user}:{password}@{host}:{port}/{db_name}".format(
             user=self.POSTGRES_USER,
