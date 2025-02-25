@@ -1,4 +1,4 @@
-from ..base import CRUDBase
+from .base import CRUDBase
 from db.models import Author
 
 

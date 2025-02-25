@@ -1,7 +1,7 @@
 from typing import List
 from uuid import UUID
 
-from crud.v1 import publisher
+from crud import publisher
 from db import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from schemas.publishers import (
