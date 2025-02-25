@@ -17,3 +17,15 @@ class Publisher(BaseORM):
         Index("publisher_code_idx", code, postgresql_using="hash"),
         Index("publishers_name_idx", name, postgresql_using="hash"),
     )
+
+
+class Author(BaseORM):
+    __tablename__ = "authors"
+
+    code = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(Text, unique=True, nullable=False)
+
+    __table_args__ = (
+        Index("author_code_idx", code, postgresql_using="hash"),
+        Index("author_name_idx", name, postgresql_using="hash"),
+    )
