@@ -10,6 +10,7 @@ from sqlalchemy import (
     String,
     Text,
     CheckConstraint,
+    Date,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -89,4 +90,21 @@ class Reader(BaseORM):
         CheckConstraint(
             r"phone ~ '^\+\d{1,3}\(\d{1,4}\)\d{3}-\d{2}-\d{2}$'", name="check_phone_format"
         ),
+    )
+
+
+class Issuance(BaseORM):
+    __tablename__ = "issuances"
+
+    code = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    reader_code = Column(UUID(as_uuid=True), ForeignKey("readers.code"), nullable=False)
+    book_code = Column(UUID(as_uuid=True), ForeignKey("books.code"), nullable=False)
+    date = Column(Date, nullable=False)
+
+    reader = relationship("Reader", back_populates="issuances")
+    book = relationship("Book", back_populates="issuances")
+
+    __table_args__ = (
+        Index("issuance_date_idx", date),
+        Index("issuances_code_idx", code, postgresql_using="hash"),
     )
