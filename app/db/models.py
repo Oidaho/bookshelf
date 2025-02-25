@@ -22,7 +22,7 @@ class Publisher(BaseORM):
     __tablename__ = "publishers"
 
     code = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(Text, nullable=False)
+    name = Column(Text, unique=True, nullable=False)
     city = Column(String(60), default=None)
 
     books = relationship("Book", back_populates="publisher")
