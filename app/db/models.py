@@ -51,8 +51,16 @@ class Book(BaseORM):
     __tablename__ = "books"
 
     code = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    publisher_code = Column(UUID(as_uuid=True), ForeignKey("publishers.code"), nullable=False)
-    author_code = Column(UUID(as_uuid=True), ForeignKey("authors.code"), nullable=False)
+    publisher_code = Column(
+        UUID(as_uuid=True),
+        ForeignKey("publishers.code", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False,
+    )
+    author_code = Column(
+        UUID(as_uuid=True),
+        ForeignKey("authors.code", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False,
+    )
     publishing_year = Column(SmallInteger)
     title = Column(Text)
     price = Column(DECIMAL(10, 2))
@@ -97,8 +105,16 @@ class Issuance(BaseORM):
     __tablename__ = "issuances"
 
     code = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    reader_code = Column(UUID(as_uuid=True), ForeignKey("readers.code"), nullable=False)
-    book_code = Column(UUID(as_uuid=True), ForeignKey("books.code"), nullable=False)
+    reader_code = Column(
+        UUID(as_uuid=True),
+        ForeignKey("readers.code", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False,
+    )
+    book_code = Column(
+        UUID(as_uuid=True),
+        ForeignKey("books.code", ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False,
+    )
     date = Column(Date, nullable=False)
 
     reader = relationship("Reader", back_populates="issuances")
