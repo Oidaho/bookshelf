@@ -72,3 +72,21 @@ class Book(BaseORM):
             (publishing_year > 0) & (publishing_year < 10000), name="check_publishing_year_correct"
         ),
     )
+
+
+class Reader(BaseORM):
+    __tablename__ = "readers"
+
+    code = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    full_name = Column(String(255), nullable=False)
+    address = Column(Text, nullable=False)
+    phone = Column(String(20), nullable=False, unique=True)
+
+    __table_args__ = (
+        Index("reader_code_idx", code, postgresql_using="hash"),
+        Index("reader_full_name_idx", full_name, postgresql_using="hash"),
+        Index("reader_phone_idx", phone, postgresql_using="hash"),
+        CheckConstraint(
+            r"phone ~ '^\+\d{1,3}\(\d{1,4}\)\d{3}-\d{2}-\d{2}$'", name="check_phone_format"
+        ),
+    )
