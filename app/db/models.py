@@ -92,6 +92,8 @@ class Reader(BaseORM):
     address = Column(Text, nullable=False)
     phone = Column(String(20), nullable=False, unique=True)
 
+    issuances = relationship("Issuance", back_populates="reader")
+
     __table_args__ = (
         Index("reader_code_idx", code, postgresql_using="hash"),
         Index("reader_full_name_idx", full_name, postgresql_using="hash"),
