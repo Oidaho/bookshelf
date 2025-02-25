@@ -1,6 +1,27 @@
 version: "3.8"
 
 services:
+
+  postgres:
+    image: postgres:17.2
+    container_name: db
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      internal:
+        ipv4_address: 172.20.0.2
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bookshelf -d book_fund"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   bookshelf:
     container_name: bookshelf
     build: 
@@ -10,9 +31,12 @@ services:
       - "6177:6177"
     env_file:
       - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       internal:
-        ipv4_address: 172.20.0.5
+        ipv4_address: 172.20.0.3
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:6177/api/v1/health"]
@@ -26,3 +50,7 @@ networks:
     ipam:
       config:
         - subnet: 172.20.0.0/24
+
+volumes:
+  postgres_data:
+    driver: local
