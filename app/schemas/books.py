@@ -13,7 +13,7 @@ class BookResponse(BaseModel):
     title: Annotated[str, Field(...)]
     publishing_year: Annotated[Optional[int], Field(None, le=10000, ge=0)]
     price: Annotated[float, Field(0.0, ge=0.0)]
-    amount: Annotated[int, Field(1, gt=0)]
+    amount: Annotated[int, Field(1, ge=0)]
 
 
 class CreateBook(BaseModel):
@@ -22,7 +22,7 @@ class CreateBook(BaseModel):
     title: Annotated[str, Field(...)]
     publishing_year: Annotated[Optional[int], Field(None, le=10000, ge=0)]
     price: Annotated[float, Field(0.0, ge=0.0)]
-    amount: Annotated[int, Field(1, gt=0)]
+    amount: Annotated[int, Field(1, ge=0)]
 
 
 class UpdateBook(BaseModel):
@@ -31,4 +31,4 @@ class UpdateBook(BaseModel):
     title: Annotated[Optional[str], Field(None)]
     publishing_year: Annotated[Optional[int], Field(None, le=10000, ge=0)]
     price: Annotated[Optional[float], Field(None, ge=0.0)]
-    amount: Annotated[Optional[int], Field(None, gt=0)]
+    amount: Annotated[Optional[int], Field(None, ge=0)]
