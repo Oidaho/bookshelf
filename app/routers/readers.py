@@ -21,7 +21,7 @@ async def get_readers(
     db: AsyncSession = Depends(get_db),
 ) -> List[ReaderResponse]:
     result = await reader.get_all(db, pagination.skip, pagination.limit)
-    return [ReaderResponse.model_validate(publisher) for publisher in result]
+    return [ReaderResponse.model_validate(reader) for reader in result]
 
 
 @router.get("/{code}", summary="Get specific Publisher", tags=["Detail", "Readers"])

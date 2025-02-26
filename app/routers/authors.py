@@ -21,7 +21,7 @@ async def get_authors(
     db: AsyncSession = Depends(get_db),
 ) -> List[AuthorResponse]:
     result = await author.get_all(db, pagination.skip, pagination.limit)
-    return [AuthorResponse.model_validate(publisher) for publisher in result]
+    return [AuthorResponse.model_validate(author) for author in result]
 
 
 @router.get("/{code}", summary="Get specific Author", tags=["Detail", "Authors"])
