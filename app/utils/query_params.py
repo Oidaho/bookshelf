@@ -9,5 +9,15 @@ class ListingPagination(BaseModel):
     limit: Annotated[int, Query(50, le=200, example=50)]
 
 
+class ListingFiltering(BaseModel):
+    # TODO: write me
+    pass
+
+
+class ListingOrdering(BaseModel):
+    # TODO: write me
+    pass
+
+
 class DateSearch(BaseModel):
     date: Annotated[date, Field(default_factory=date.today)]
