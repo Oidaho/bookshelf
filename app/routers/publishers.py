@@ -1,26 +1,26 @@
 from typing import List
 from uuid import UUID
 
-from crud import publisher
 from db import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from schemas.publishers import (
-    PublisherResponse,
     CreatePublisher,
+    PublisherResponse,
     UpdatePublisher,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
+from utils import ListingPagination
+from utils.crud import publisher
 
 router = APIRouter(prefix="/publishers")
 
 
 @router.get("", summary="Get all Publishers", tags=["Listing", "Publishers"])
 async def get_publishers(
-    skip: int = 0,
-    limit: int = 100,
+    pagination: ListingPagination = Depends(),
     db: AsyncSession = Depends(get_db),
 ) -> List[PublisherResponse]:
-    result = await publisher.get_all(db, skip, limit)
+    result = await publisher.get_all(db, pagination.skip, pagination.limit)
     return [PublisherResponse.model_validate(publisher) for publisher in result]
 
 

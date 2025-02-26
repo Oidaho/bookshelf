@@ -1,7 +1,6 @@
 from typing import List
 from uuid import UUID
 
-from crud import author
 from db import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from schemas.authors import (
@@ -10,17 +9,18 @@ from schemas.authors import (
     UpdateAuthor,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
+from utils import ListingPagination
+from utils.crud import author
 
 router = APIRouter(prefix="/authors")
 
 
 @router.get("", summary="Get all Authors", tags=["Listing", "Authors"])
 async def get_authors(
-    skip: int = 0,
-    limit: int = 100,
+    pagination: ListingPagination = Depends(),
     db: AsyncSession = Depends(get_db),
 ) -> List[AuthorResponse]:
-    result = await author.get_all(db, skip, limit)
+    result = await author.get_all(db, pagination.skip, pagination.limit)
     return [AuthorResponse.model_validate(publisher) for publisher in result]
 
 
