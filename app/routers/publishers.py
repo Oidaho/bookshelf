@@ -2,7 +2,7 @@ from typing import List
 from uuid import UUID
 
 from db import get_db
-from fastapi import APIRouter, Body, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends
 from schemas.publishers import (
     CreatePublisher,
     PublisherResponse,
@@ -30,10 +30,6 @@ async def get_publisher(
     db: AsyncSession = Depends(get_db),
 ) -> PublisherResponse:
     result = await publisher.get(db, code)
-
-    if not result:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Publisher not found.")
-
     return PublisherResponse.model_validate(result)
 
 
@@ -42,16 +38,7 @@ async def create_publisher(
     data: CreatePublisher = Body(),
     db: AsyncSession = Depends(get_db),
 ) -> PublisherResponse:
-    try:
-        result = await publisher.create(db, data.model_dump())
-
-    except Exception:
-        await db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error ocured while creating publisher.",
-        )
-
+    result = await publisher.create(db, data.model_dump())
     return PublisherResponse.model_validate(result)
 
 
@@ -61,10 +48,6 @@ async def delete_publisher(
     db: AsyncSession = Depends(get_db),
 ) -> PublisherResponse:
     result = await publisher.delete(db, code)
-
-    if not result:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Publisher not found.")
-
     return PublisherResponse.model_validate(result)
 
 
@@ -75,8 +58,4 @@ async def update_publisher(
     db: AsyncSession = Depends(get_db),
 ) -> PublisherResponse:
     result = await publisher.update(db, code, data.model_dump(exclude_none=True))
-
-    if not result:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Publisher not found.")
-
     return PublisherResponse.model_validate(result)
