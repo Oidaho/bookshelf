@@ -61,7 +61,7 @@ class Book(BaseORM):
         ForeignKey("authors.code", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
-    title = Column(Text, nullable=False, unique=True)
+    title = Column(Text, nullable=False)
     publishing_year = Column(SmallInteger)
     price = Column(DECIMAL(10, 2), nullable=False, default=0.0)
     amount = Column(Integer, nullable=False, default=1)
