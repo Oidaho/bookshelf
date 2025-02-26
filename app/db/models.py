@@ -61,10 +61,10 @@ class Book(BaseORM):
         ForeignKey("authors.code", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
+    title = Column(Text, nullable=False, unique=True)
     publishing_year = Column(SmallInteger)
-    title = Column(Text)
-    price = Column(DECIMAL(10, 2))
-    amount = Column(Integer)
+    price = Column(DECIMAL(10, 2), nullable=False, default=0.0)
+    amount = Column(Integer, nullable=False, default=0)
 
     publisher = relationship("Publisher", back_populates="books")
     author = relationship("Author", back_populates="books")
@@ -89,8 +89,8 @@ class Reader(BaseORM):
 
     code = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     full_name = Column(String(255), nullable=False)
-    address = Column(Text, nullable=False)
     phone = Column(String(20), nullable=False, unique=True)
+    address = Column(Text, default=None)
 
     issuances = relationship("Issuance", back_populates="reader")
 
