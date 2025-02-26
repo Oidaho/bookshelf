@@ -11,11 +11,13 @@ from sqlalchemy import (
     Text,
     CheckConstraint,
     Date,
+    UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from .engine import BaseORM
+from datetime import date, timedelta
 
 
 class Publisher(BaseORM):
@@ -81,6 +83,7 @@ class Book(BaseORM):
         CheckConstraint(
             (publishing_year > 0) & (publishing_year <= 10000), name="check_publishing_year_correct"
         ),
+        UniqueConstraint(publisher_code, author_code, title, name="uniq_book_instance"),
     )
 
 
@@ -118,12 +121,14 @@ class Issuance(BaseORM):
         ForeignKey("books.code", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
-    date = Column(Date, nullable=False)
+    issuanced_at = Column(Date, nullable=False, default=date.today)
+    expires_at = Column(Date, nullable=False, default=lambda: date.today() + timedelta(days=21))
 
     reader = relationship("Reader", back_populates="issuances")
     book = relationship("Book", back_populates="issuances")
 
     __table_args__ = (
-        Index("issuance_date_idx", date),
+        Index("issuance_date_idx", issuanced_at),
+        Index("issuance_expiration_date_idx", expires_at),
         Index("issuances_code_idx", code, postgresql_using="hash"),
     )
