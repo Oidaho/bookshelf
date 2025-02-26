@@ -1,7 +1,9 @@
-from typing import Type, Generic, TypeVar
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from typing import Generic, Type, TypeVar
+
 from fastapi import HTTPException, status
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 AlchemyModel = TypeVar("AlchemyModel")
 
@@ -31,12 +33,21 @@ class CRUD(Generic[AlchemyModel]):
             db.add(db_obj)
             await db.commit()
             await db.refresh(db_obj)
+
+        except IntegrityError:
+            await db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"{self.model.__name__} with this data already exists.",
+            )
+
         except Exception:
             await db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"An error ocured while creating {self.model.__name__}.",
             )
+
         return db_obj
 
     async def delete(self, db: AsyncSession, code: str, raise_404: bool = True):
@@ -44,6 +55,8 @@ class CRUD(Generic[AlchemyModel]):
         try:
             await db.delete(db_obj)
             await db.commit()
+
+        # Ошибки целосности отработают на уровне Pyndantic схем
         except Exception:
             await db.rollback()
             raise HTTPException(
@@ -60,6 +73,8 @@ class CRUD(Generic[AlchemyModel]):
             db.add(db_obj)
             await db.commit()
             await db.refresh(db_obj)
+
+        # Ошибки целосности отработают на уровне Pyndantic схем
         except Exception:
             await db.rollback()
             raise HTTPException(
