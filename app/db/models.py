@@ -64,7 +64,7 @@ class Book(BaseORM):
     title = Column(Text, nullable=False, unique=True)
     publishing_year = Column(SmallInteger)
     price = Column(DECIMAL(10, 2), nullable=False, default=0.0)
-    amount = Column(Integer, nullable=False, default=0)
+    amount = Column(Integer, nullable=False, default=1)
 
     publisher = relationship("Publisher", back_populates="books")
     author = relationship("Author", back_populates="books")
@@ -76,10 +76,10 @@ class Book(BaseORM):
         Index("book_publishing_year_idx", publishing_year),
         Index("book_price_idx", price),
         Index("book_amount_idx", amount),
-        CheckConstraint(price > 0, name="check_price_non_negative"),
-        CheckConstraint(amount > 0, name="check_amount_non_negative"),
+        CheckConstraint(price >= 0.0, name="check_price_non_negative"),
+        CheckConstraint(amount > 0, name="check_amount_natural"),
         CheckConstraint(
-            (publishing_year > 0) & (publishing_year < 10000), name="check_publishing_year_correct"
+            (publishing_year > 0) & (publishing_year <= 10000), name="check_publishing_year_correct"
         ),
     )
 
