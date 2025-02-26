@@ -5,7 +5,7 @@ from sqlalchemy import select
 AlchemyModel = TypeVar("AlchemyModel")
 
 
-class CRUDBase(Generic[AlchemyModel]):
+class CRUD(Generic[AlchemyModel]):
     def __init__(self, model: Type[AlchemyModel]):
         self.model = model
 
@@ -13,8 +13,8 @@ class CRUDBase(Generic[AlchemyModel]):
         result = await db.execute(select(self.model).filter(self.model.code == code))
         return result.scalar_one_or_none()
 
-    async def get_all(self, db: AsyncSession, skip: int, limit: int):
-        result = await db.execute(select(self.model).offset(skip).limit(limit))
+    async def get_all(self, db: AsyncSession, offset: int, limit: int):
+        result = await db.execute(select(self.model).offset(offset).limit(limit))
         return result.scalars().all()
 
     async def create(self, db: AsyncSession, obj_in: dict):

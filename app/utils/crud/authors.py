@@ -1,9 +1,9 @@
-from .base import CRUDBase
+from .base import CRUD
 from db.models import Author
 
 
-class CRUDAuthor(CRUDBase[Author]):
+class AuthorCRUD(CRUD[Author]):
     pass
 
 
-author = CRUDAuthor(Author)
+author = AuthorCRUD(Author)

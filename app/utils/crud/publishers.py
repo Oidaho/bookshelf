@@ -1,9 +1,9 @@
-from .base import CRUDBase
+from .base import CRUD
 from db.models import Publisher
 
 
-class CRUDPublisher(CRUDBase[Publisher]):
+class PublisherCRUD(CRUD[Publisher]):
     pass
 
 
-publisher = CRUDPublisher(Publisher)
+publisher = PublisherCRUD(Publisher)
