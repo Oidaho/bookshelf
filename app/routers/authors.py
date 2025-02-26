@@ -2,7 +2,7 @@ from typing import List
 from uuid import UUID
 
 from db import get_db
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 from schemas.authors import (
     AuthorResponse,
     CreateAuthor,
@@ -39,7 +39,7 @@ async def get_publisher(
 
 @router.post("", summary="Create new Author", tags=["Create", "Authors"])
 async def create_publisher(
-    data: CreateAuthor = Depends(),
+    data: CreateAuthor = Body(),
     db: AsyncSession = Depends(get_db),
 ) -> AuthorResponse:
     try:
@@ -71,7 +71,7 @@ async def delete_publisher(
 @router.patch("/{code}", summary="Update specific Author", tags=["Update", "Authors"])
 async def update_publisher(
     code: UUID,
-    data: UpdateAuthor = Depends(),
+    data: UpdateAuthor = Body(),
     db: AsyncSession = Depends(get_db),
 ) -> AuthorResponse:
     result = await author.update(db, code, data.model_dump(exclude_none=True))
