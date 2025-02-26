@@ -1,4 +1,4 @@
-from asyncpg.exceptions import UniqueViolationError
+from sqlalchemy.exc import IntegrityError
 from db.models import Book
 from fastapi import HTTPException, status
 
@@ -22,11 +22,18 @@ class BookCRUD(CRUD[Book]):
             await db.commit()
             await db.refresh(db_obj)
 
-        except UniqueViolationError:
+        except IntegrityError:
             await db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"{self.model.__name__} with this data already exists.",
+            )
+
+        except Exception:
+            await db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"An error ocured while creating {self.model.__name__}.",
             )
 
         return db_obj
