@@ -11,17 +11,17 @@ class ReaderResponse(BaseModel):
 
     code: Annotated[UUID, Field(...)]
     full_name: Annotated[str, Field(..., max_length=255)]
-    address: Annotated[str, Field(...)]
     phone: Annotated[str, Field(..., pattern=PHONE_REGEX)]
+    address: Annotated[Optional[str], Field(None)]
 
 
 class CreateReader(BaseModel):
     full_name: Annotated[str, Field(..., max_length=255)]
-    address: Annotated[str, Field(...)]
     phone: Annotated[str, Field(..., pattern=PHONE_REGEX)]
+    address: Annotated[Optional[str], Field(None)]
 
 
 class UpdateReader(BaseModel):
     full_name: Annotated[Optional[str], Field(None, max_length=255)]
-    address: Annotated[Optional[str], Field(None)]
     phone: Annotated[Optional[str], Field(None, pattern=PHONE_REGEX)]
+    address: Annotated[Optional[str], Field(None)]
