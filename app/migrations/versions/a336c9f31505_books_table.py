@@ -30,7 +30,7 @@ def upgrade() -> None:
         sa.Column("title", sa.Text(), nullable=True),
         sa.Column("price", sa.DECIMAL(precision=10, scale=2), nullable=True),
         sa.Column("amount", sa.Integer(), nullable=True),
-        sa.CheckConstraint("amount > 0", name="check_amount_non_negative"),
+        sa.CheckConstraint("amount >= 0", name="check_amount_non_negative"),
         sa.CheckConstraint("price >= 0.0", name="check_price_non_negative"),
         sa.CheckConstraint(
             "publishing_year > 0 AND publishing_year <= 10000", name="check_publishing_year_correct"
