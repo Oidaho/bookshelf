@@ -1,18 +1,19 @@
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Annotated, Optional
 from uuid import UUID
-from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class AuthorResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    code: UUID
-    name: str
+    code: Annotated[UUID, Field(...)]
+    name: Annotated[str, Field(...)]
 
 
 class CreateAuthor(BaseModel):
-    name: str
+    name: Annotated[str, Field(...)]
 
 
 class UpdateAuthor(BaseModel):
-    name: Optional[str] = Field(default=None)
+    name: Annotated[Optional[str], Field(default=None)]

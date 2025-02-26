@@ -1,21 +1,22 @@
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Annotated, Optional
 from uuid import UUID
-from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class PublisherResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    code: UUID
-    name: str
-    city: Optional[str] = Field(max_length=60)
+    code: Annotated[UUID, Field(...)]
+    name: Annotated[str, Field(...)]
+    city: Annotated[Optional[str], Field(None, max_length=60)]
 
 
 class CreatePublisher(BaseModel):
-    name: str
-    city: Optional[str] = Field(default=None, max_length=60)
+    name: Annotated[str, Field(...)]
+    city: Annotated[Optional[str], Field(None, max_length=60)]
 
 
 class UpdatePublisher(BaseModel):
-    name: Optional[str] = Field(default=None)
-    city: Optional[str] = Field(default=None, max_length=60)
+    name: Annotated[Optional[str], Field(None)]
+    city: Annotated[Optional[str], Field(None, max_length=60)]

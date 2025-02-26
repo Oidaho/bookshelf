@@ -1,24 +1,27 @@
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Annotated, Optional
 from uuid import UUID
-from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, Field
+
+PHONE_REGEX = r"^\+\d{1,3}\(\d{1,4}\)\d{3}-\d{2}-\d{2}$"
 
 
 class ReaderResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    code: UUID
-    full_name: str = Field(..., max_length=255)
-    address: str = Field(...)
-    phone: str = Field(..., pattern=r"^\+\d{1,3}\(\d{1,4}\)\d{3}-\d{2}-\d{2}$")
+    code: Annotated[UUID, Field(...)]
+    full_name: Annotated[str, Field(..., max_length=255)]
+    address: Annotated[str, Field(...)]
+    phone: Annotated[str, Field(..., pattern=PHONE_REGEX)]
 
 
 class CreateReader(BaseModel):
-    full_name: str = Field(..., max_length=255)
-    address: str = Field(...)
-    phone: str = Field(..., pattern=r"^\+\d{1,3}\(\d{1,4}\)\d{3}-\d{2}-\d{2}$")
+    full_name: Annotated[str, Field(..., max_length=255)]
+    address: Annotated[str, Field(...)]
+    phone: Annotated[str, Field(..., pattern=PHONE_REGEX)]
 
 
 class UpdateReader(BaseModel):
-    full_name: Optional[str] = Field(None, max_length=255)
-    address: Optional[str] = Field(None)
-    phone: Optional[str] = Field(None, pattern=r"^\+\d{1,3}\(\d{1,4}\)\d{3}-\d{2}-\d{2}$")
+    full_name: Annotated[Optional[str], Field(None, max_length=255)]
+    address: Annotated[Optional[str], Field(None)]
+    phone: Annotated[Optional[str], Field(None, pattern=PHONE_REGEX)]
