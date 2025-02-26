@@ -1,6 +1,6 @@
 from configs import configs
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncEngine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncEngine, AsyncAttrs
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 engine: AsyncEngine = create_async_engine(
     configs.database.DATABASE_URL,
@@ -16,7 +16,8 @@ LocalAsyncSession: AsyncSession = sessionmaker(
 )
 
 
-BaseORM = declarative_base()
+class BaseORM(AsyncAttrs, DeclarativeBase):
+    pass
 
 
 async def disconnect_db():

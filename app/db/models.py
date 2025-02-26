@@ -27,7 +27,7 @@ class Publisher(BaseORM):
     name = Column(Text, unique=True, nullable=False)
     city = Column(String(60), default=None)
 
-    books = relationship("Book", back_populates="publisher")
+    books = relationship("Book", back_populates="publisher", cascade="all, delete")
 
     __table_args__ = (
         Index("publisher_code_idx", code, postgresql_using="hash"),
@@ -41,7 +41,7 @@ class Author(BaseORM):
     code = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(Text, unique=True, nullable=False)
 
-    books = relationship("Book", back_populates="author")
+    books = relationship("Book", back_populates="author", cascade="all, delete")
 
     __table_args__ = (
         Index("author_code_idx", code, postgresql_using="hash"),
@@ -70,7 +70,7 @@ class Book(BaseORM):
 
     publisher = relationship("Publisher", back_populates="books")
     author = relationship("Author", back_populates="books")
-    issuances = relationship("Issuance", back_populates="book")
+    issuances = relationship("Issuance", back_populates="book", cascade="all, delete")
 
     __table_args__ = (
         Index("books_code_idx", code, postgresql_using="hash"),
@@ -79,7 +79,7 @@ class Book(BaseORM):
         Index("book_price_idx", price),
         Index("book_amount_idx", amount),
         CheckConstraint(price >= 0.0, name="check_price_non_negative"),
-        CheckConstraint(amount > 0, name="check_amount_natural"),
+        CheckConstraint(amount >= 0, name="check_amount_non_negative"),
         CheckConstraint(
             (publishing_year > 0) & (publishing_year <= 10000), name="check_publishing_year_correct"
         ),
@@ -95,7 +95,7 @@ class Reader(BaseORM):
     phone = Column(String(20), nullable=False, unique=True)
     address = Column(Text, default=None)
 
-    issuances = relationship("Issuance", back_populates="reader")
+    issuances = relationship("Issuance", back_populates="reader", cascade="all, delete")
 
     __table_args__ = (
         Index("reader_code_idx", code, postgresql_using="hash"),
