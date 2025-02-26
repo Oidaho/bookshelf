@@ -3,7 +3,7 @@ from uuid import UUID
 from typing import Optional
 
 
-class Author(BaseModel):
+class AuthorResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     code: UUID

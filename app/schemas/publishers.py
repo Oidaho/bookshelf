@@ -3,7 +3,7 @@ from uuid import UUID
 from typing import Optional
 
 
-class Publisher(BaseModel):
+class PublisherResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     code: UUID
