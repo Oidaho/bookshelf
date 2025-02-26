@@ -38,5 +38,33 @@ class BookCRUD(CRUD[Book]):
 
         return db_obj
 
+    async def delete(self, db, code, raise_404=True):
+        db_obj = await self.get(db, code, raise_404)
+
+        # Переменные сокращены с целью предотвращения конфликтов имен
+        a = await db_obj.awaitable_attrs.author
+        p = await db_obj.awaitable_attrs.publisher
+
+        try:
+            await db.delete(db_obj)
+            await db.commit()
+
+            if len(await a.awaitable_attrs.books) < 1:
+                await db.delete(a)
+                await db.commit()
+
+            if len(await p.awaitable_attrs.books) < 1:
+                await db.delete(p)
+                await db.commit()
+
+        # Ошибки целосности отработают на уровне Pyndantic схем
+        except Exception:
+            await db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"An error ocured while deleting {self.model.__name__}.",
+            )
+        return db_obj
+
 
 book = BookCRUD(Book)
