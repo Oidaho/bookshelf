@@ -1,5 +1,6 @@
-from .base import CRUD
 from db.models import Author
+
+from .base import CRUD
 
 
 class AuthorCRUD(CRUD[Author]):
