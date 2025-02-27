@@ -1,9 +1,9 @@
 from db.models import Author
 
-from .base import CRUD
+from .base import WithHTTPExceptions, WithParameterizedListing
 
 
-class AuthorCRUD(CRUD[Author]):
+class AuthorCRUD(WithParameterizedListing[Author], WithHTTPExceptions[Author]):
     pass
 
 

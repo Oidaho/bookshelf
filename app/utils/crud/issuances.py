@@ -3,15 +3,17 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
 from .books import book
-from .base import CRUD
+from .base import WithHTTPExceptions, WithParameterizedListing
 from .readers import reader
 
 
 # ! Если настолько сложные взаимодействия не будут интересовать в рамках CRUD -
 # ! удалите все переопределенные методы и оставьте pass в теле класса.
+# ! Также можно откатиться до совсем базовых операций, унаследовав класс
+# ! от from .base import BaseCRUD с указанием контекста модели (BaseCRUD[Issuance]).
 
 
-class IssuanceCRUD(CRUD[Issuance]):
+class IssuanceCRUD(WithParameterizedListing[Issuance], WithHTTPExceptions[Issuance]):
     async def create(self, db, obj_in):
         # * Переменные сокращены с целью предотвращения конфликтов имен
         r = await reader.get(db, code=obj_in.pop("reader_code"))

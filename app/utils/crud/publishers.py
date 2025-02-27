@@ -1,9 +1,9 @@
 from db.models import Publisher
 
-from .base import CRUD
+from .base import WithHTTPExceptions, WithParameterizedListing
 
 
-class PublisherCRUD(CRUD[Publisher]):
+class PublisherCRUD(WithParameterizedListing[Publisher], WithHTTPExceptions[Publisher]):
     pass
 
 
