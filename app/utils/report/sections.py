@@ -7,12 +7,26 @@ from .styles import TITLE_STYLE, TOTAL_STYLE, HEADER_STYLE, BOOK_STYLE, READER_S
 
 
 class Section(ABC):
+    """Базовый абстрактный класс секции.
+
+    Секция - определенный заготовленный патерн\\обьект, который
+    будет размещен на листе ws.
+    """
+
     @abstractmethod
     def render(self, builder: ReportBuilder) -> None:
+        """Отрисовывает (размещает) секцию на текущем листе,
+        используя методы класса-билдера.
+
+        Args:
+            builder (ReportBuilder): Инстанс класса-билдера.
+        """
         pass
 
 
 class TitleSection(Section):
+    """Секция заголовка отчета."""
+
     def __init__(self, report_date: date) -> None:
         self.report_date = report_date
 
@@ -24,6 +38,8 @@ class TitleSection(Section):
 
 
 class TableHeaderSection(Section):
+    """Секция заголовка таблицы отчета."""
+
     HEADERS = ["Телефон", "Автор", "Название книги", "Цена книги, тыс. руб.", "Дата выдачи"]
 
     def __init__(self, column_config: Dict[str, int]):
@@ -35,6 +51,12 @@ class TableHeaderSection(Section):
 
 
 class ReaderSection(Section):
+    """Секция читателя в таблице.
+
+    Размещает строки с именем читателя, информацию
+    по удержаным книгам и суммарное кол-во книг.
+    """
+
     def __init__(self, reader_name: str, books: List[List[Any]]):
         self.reader_name = reader_name
         self.books = books
@@ -55,6 +77,8 @@ class ReaderSection(Section):
 
 
 class LibraryTotalSection(Section):
+    """Секция суммарного кол-во удержаных книг по библиотеке."""
+
     def __init__(self, total: int):
         self.total = total
 

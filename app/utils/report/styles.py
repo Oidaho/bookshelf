@@ -1,13 +1,21 @@
 from openpyxl.styles import Alignment, Border, Font, Side
+from openpyxl.cell import Cell
 
 
 class CellStyle:
+    """Класс стилей секций."""
+
     def __init__(self, font: Font = None, alignment: Alignment = None, border: Border = None):
         self.font = font
         self.alignment = alignment
         self.border = border
 
-    def apply(self, cell):
+    def apply(self, cell: Cell):
+        """Применяет стили к указаной ячейке.
+
+        Args:
+            cell (Cell): Конкретная ячейка.
+        """
         if self.font:
             cell.font = self.font
         if self.alignment:

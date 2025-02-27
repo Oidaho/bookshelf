@@ -1,5 +1,6 @@
 from datetime import date
-from typing import Generic, Optional, Type, TypeVar, Union
+from typing import Generic, Optional, Protocol, Type, TypeVar, Union, List
+from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import Column, String, asc, desc, select
@@ -8,36 +9,94 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..query_params import ListingPagination, ListingSearch, ListingSort, SortOrder
 
-AlchemyModel = TypeVar("AlchemyModel")
+
+class Codable(Protocol):
+    """Протокол, описывающий обьект,
+    который имеет в своей сигнатуре колонку code типа UUID.
+    """
+
+    code: Column[UUID]
 
 
-class BaseCRUD(Generic[AlchemyModel]):
-    def __init__(self, model: Type[AlchemyModel]):
+# AlchemyModel
+_AM = TypeVar("_AM", bound=Codable)
+
+
+class BaseCRUD(Generic[_AM]):
+    """Базовый класс для реализации операций CRUD для моделей SQLAlchemy,
+    которые имеют поле code (UUID) в качестве свеого PrimaryKey.
+    """
+
+    def __init__(self, model: Type[_AM]):
         self.model = model
 
-    async def get_all(self, db: AsyncSession):
+    async def get_all(self, db: AsyncSession) -> List[_AM]:
+        """Возвращает листинг сущностей в БД.
+
+        Args:
+            db (AsyncSession): Асинхронная сессия БД.
+
+        Returns:
+            List[_AM]: Список инстансов моделей SLQAlchemy.
+        """
         result = await db.execute(select(self.model))
         return result.scalars().all()
 
-    async def get(self, db: AsyncSession, code: str):
+    async def get(self, db: AsyncSession, code: Union[str, UUID]) -> _AM:
+        """Возвращает сущность по ее коду (code).
+
+        Args:
+            db (AsyncSession): Асинхронная сессия БД.
+            code (Union[str, UUID]): UUID (код) сущности.
+
+        Returns:
+            _AM: Инстанс модели SLQAlchemy.
+        """
         result = await db.execute(select(self.model).filter(self.model.code == code))
         db_obj = result.scalar_one_or_none()
         return db_obj
 
-    async def create(self, db: AsyncSession, obj_in: dict):
+    async def create(self, db: AsyncSession, obj_in: dict) -> _AM:
+        """Создает сущность и возвращает ее инстанс.
+
+        Args:
+            db (AsyncSession): Асинхронная сессия БД.
+            obj_in (dict): Данные для создания сущности.
+
+        Returns:
+            _AM: Созданый инстанс модели SLQAlchemy.
+        """
         db_obj = self.model(**obj_in)
         db.add(db_obj)
         await db.commit()
         await db.refresh(db_obj)
         return db_obj
 
-    async def delete(self, db: AsyncSession, code: str):
+    async def delete(self, db: AsyncSession, code: Union[str, UUID]) -> _AM:
+        """Удаляет сущность и возвращает ее инстанс.
+
+        Args:
+            db (AsyncSession): Асинхронная сессия БД.
+            code (Union[str, UUID]): Код сущности.
+
+        Returns:
+            _AM: Удаленный инстанс модели SLQAlchemy.
+        """
         db_obj = await self.get(db, code)
         await db.delete(db_obj)
         await db.commit()
         return db_obj
 
-    async def update(self, db: AsyncSession, code: str, obj_in: dict):
+    async def update(self, db: AsyncSession, code: Union[str, UUID], obj_in: dict) -> _AM:
+        """Обновляет сущность и возвращает ее измененный инстанс.
+
+        Args:
+            db (AsyncSession): Асинхронная сессия БД.
+            obj_in (dict): Данные для обновления полей сущности.
+
+        Returns:
+            _AM: Измененный инстанс модели SLQAlchemy.
+        """
         db_obj = await self.get(db, code)
         for field in obj_in:
             setattr(db_obj, field, obj_in[field])
@@ -47,8 +106,32 @@ class BaseCRUD(Generic[AlchemyModel]):
         return db_obj
 
 
-class WithHTTPExceptions(BaseCRUD[AlchemyModel]):
-    async def get(self, db: AsyncSession, code: str, raise_404: bool = True):
+class WithHTTPExceptions(BaseCRUD[_AM]):
+    """Класс предоставляет переопределенную функции CRUD операций,
+    имеющую дополнительные вызовы HTTP исключений в определенных ситуациях,
+    в отличие от базовго CRUD класса.
+    """
+
+    async def get(
+        self,
+        db: AsyncSession,
+        code: Union[str, UUID],
+        raise_404: bool = True,
+    ) -> _AM:
+        """Возвращает сущность по ее коду (code).
+        вызывает HTTP исключение в случае ее отсутствия.
+
+        Args:
+            db (AsyncSession): Асинхронная сессия БД.
+            code (Union[str, UUID]): UUID (код) сущности.
+            raise_404 (bool, optional): Вызывать ли HTTP404 если сущность не найдена. Defaults to True.
+
+        Raises:
+            HTTPException: 404. Сущность отсутствует в БД.
+
+        Returns:
+            _AM: Инстанс модели SLQAlchemy.
+        """
         result = await db.execute(select(self.model).filter(self.model.code == code))
         db_obj = result.scalar_one_or_none()
         if db_obj is None:
@@ -59,7 +142,26 @@ class WithHTTPExceptions(BaseCRUD[AlchemyModel]):
                 )
         return db_obj
 
-    async def create(self, db: AsyncSession, obj_in: dict):
+    async def create(
+        self,
+        db: AsyncSession,
+        obj_in: dict,
+    ) -> _AM:
+        """Создает сущность и возвращает ее инстанс.
+        Вызывает HTTP исключения в случае невозможности или
+        ошибки создания.
+
+        Args:
+            db (AsyncSession): Асинхронная сессия БД.
+            obj_in (dict): Данные для создания сущности.
+
+        Raises:
+            HTTPException: 400. Невозможно создать.
+            HTTPException: 500. Ошибка при создании.
+
+        Returns:
+            _AM: Созданый инстанс модели SLQAlchemy.
+        """
         try:
             db_obj = self.model(**obj_in)
             db.add(db_obj)
@@ -82,7 +184,26 @@ class WithHTTPExceptions(BaseCRUD[AlchemyModel]):
 
         return db_obj
 
-    async def delete(self, db: AsyncSession, code: str, raise_404: bool = True):
+    async def delete(
+        self,
+        db: AsyncSession,
+        code: Union[str, UUID],
+        raise_404: bool = True,
+    ) -> _AM:
+        """Удаляет сущность и возвращает ее инстанс.
+        Вызывает HTTP исключение в случае ошибки удаления.
+
+        Args:
+            db (AsyncSession): Асинхронная сессия БД.
+            code (Union[str, UUID]): UUID (код) сущности.
+            raise_404 (bool, optional): Вызывать ли HTTP404 если сущность не найдена. Defaults to True.
+
+        Raises:
+            HTTPException: 500. Ошибка при удалении.
+
+        Returns:
+            _AM: Удаленный инстанс модели SLQAlchemy.
+        """
         db_obj = await self.get(db, code, raise_404)
         try:
             await db.delete(db_obj)
@@ -97,7 +218,28 @@ class WithHTTPExceptions(BaseCRUD[AlchemyModel]):
             )
         return db_obj
 
-    async def update(self, db: AsyncSession, code: str, obj_in: dict, raise_404: bool = True):
+    async def update(
+        self,
+        db: AsyncSession,
+        code: Union[str, UUID],
+        obj_in: dict,
+        raise_404: bool = True,
+    ) -> _AM:
+        """Обновляет сущность и возвращает ее измененный инстанс.
+        Вызывает HTTP исключение при ошибке обнолвения данных.
+
+        Args:
+            db (AsyncSession): Асинхронная сессия БД.
+            code (Union[str, UUID]): UUID (код) сущности.
+            obj_in (dict): Данные для обновления полей сущности.
+            raise_404 (bool, optional): Вызывать ли HTTP404 если сущность не найдена. Defaults to True.
+
+        Raises:
+            HTTPException: 500. Ошибка при обновлении данных.
+
+        Returns:
+            _AM: Измененный инстанс модели SLQAlchemy.
+        """
         db_obj = await self.get(db, code, raise_404)
         try:
             for field in obj_in:
@@ -116,14 +258,31 @@ class WithHTTPExceptions(BaseCRUD[AlchemyModel]):
         return db_obj
 
 
-class WithParameterizedListing(BaseCRUD[AlchemyModel]):
+class WithParameterizedListing(BaseCRUD[_AM]):
+    """Класс предоставляет переопределенную функцию листинга,
+    имеющую дополнительные параметры сортировки, поиска и пагинации,
+    в отличие от базовго CRUD класса.
+    """
+
     async def get_all(
         self,
         db: AsyncSession,
         search: Optional[ListingSearch] = None,
         sort: Optional[ListingSort] = None,
         pagination: Optional[ListingPagination] = None,
-    ):
+    ) -> List[_AM]:
+        """Возвращает листинг сущностей в БД, с примененным к нему
+        поиску, сортировке и пагинации.
+
+        Args:
+            db (AsyncSession): Асинхронная сессия БД.
+            search (Optional[ListingSearch], optional): Данные для поиска. Defaults to None.
+            sort (Optional[ListingSort], optional): Данные для сортировки. Defaults to None.
+            pagination (Optional[ListingPagination], optional): Данные для пагинации. Defaults to None.
+
+        Returns:
+            List[_AM]: Список инстансов моделей SLQAlchemy.
+        """
         query = select(self.model)
 
         # Если задан поиск по полю

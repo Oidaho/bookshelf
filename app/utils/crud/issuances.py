@@ -14,7 +14,36 @@ from .readers import reader
 
 
 class IssuanceCRUD(WithParameterizedListing[Issuance], WithHTTPExceptions[Issuance]):
-    async def create(self, db, obj_in):
+    """Класс, предоставляющий CRUD операции для сущности Issuance.
+
+    Этот класс наследуется от:
+    - `WithParameterizedListing[Issuance]`: Предоставляет функциональность для параметризованного
+      получения списка объектов Issuance с поддержкой поиска, сортировки и пагинации.
+    - `WithHTTPExceptions[Issuance]`: Добавляет вызов HTTP-исключений при определенных ситуациях,
+      которые возникают при исполнении CRUD операций.
+    """
+
+    async def create(self, db, obj_in) -> Issuance:
+        """Создает сущность и возвращает ее инстанс.
+        Дополнительно проверяет существование связанных
+        сущностей, а также некоторые условия, связанные с
+        существованием достатого кол-ва книг в библиотеке
+        для выдачи и допустимым кол-вом этих выдач для
+        одного читателя.
+
+        Args:
+            db (AsyncSession): Асинхронная сессия БД.
+            obj_in (dict): Данные для создания сущности.
+
+        Raises:
+            HTTPException: 400. Превышено кол-во выдач.
+            HTTPException: 400. Не хватает книг.
+            HTTPException: 400. Невозможно создать.
+            HTTPException: 500. Ошибка при создании.
+
+        Returns:
+            Issuance: Созданый инстанс модели Issuance.
+        """
         # * Переменные сокращены с целью предотвращения конфликтов имен
         r = await reader.get(db, code=obj_in.pop("reader_code"))
         b = await book.get(db, code=obj_in.pop("book_code"))
@@ -64,7 +93,23 @@ class IssuanceCRUD(WithParameterizedListing[Issuance], WithHTTPExceptions[Issuan
 
         return db_obj
 
-    async def delete(self, db, code, raise_404=True):
+    async def delete(self, db, code, raise_404=True) -> Issuance:
+        """Удаляет сущность и возвращает ее инстанс.
+        В случае успешного удаления - возвращает книгу в библиотеку.
+        Удаляет читателя, если у него больше нет связанных выдач.
+        Вызывает HTTP исключение в случае ошибки удаления.
+
+        Args:
+            db (AsyncSession): Асинхронная сессия БД.
+            code (Union[str, UUID]): UUID (код) сущности.
+            raise_404 (bool, optional): Вызывать ли HTTP404 если сущность не найдена. Defaults to True.
+
+        Raises:
+            HTTPException: 500. Ошибка при удалении.
+
+        Returns:
+            Issuance: Удаленный инстанс модели Issuance.
+        """
         db_obj = await self.get(db, code, raise_404)
 
         # * Переменные сокращены с целью предотвращения конфликтов имен
