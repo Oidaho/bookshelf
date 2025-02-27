@@ -17,14 +17,41 @@ _SF = TypeVar("_SF", bound=Union[str, Enum])
 class SearchMode(str, Enum):
     SIMMILAR = "simmilar"
     EQ = "equal"
-    LT = "lower_than"
+    LT = "less_than"
     GT = "greater_than"
+    LTE = "less_than_or_equal"
+    GTE = "greater_than_or_equal"
+
+    def get_operator(self) -> str:
+        return {
+            SearchMode.SIMMILAR: "ILIKE",
+            SearchMode.EQ: "=",
+            SearchMode.LT: "<",
+            SearchMode.GT: ">",
+            SearchMode.LTE: "<=",
+            SearchMode.GTE: ">=",
+        }[self]
 
 
 class ListingSearch(BaseModel, Generic[_SF]):
     search_by: Annotated[Optional[_SF], Query(None, description="Search field")]
     search_mode: Annotated[SearchMode, Query(SearchMode.EQ, description="Search Mode")]
-    search_value: Annotated[Optional[str], Query(None, description="Search value")]
+    search_value: Annotated[
+        Optional[Union[str, int, float]], Query(None, description="Search value")
+    ]
+
+    @field_validator("search_value")
+    def cast_search_value(cls, v):
+        if isinstance(v, str):
+            if v.isdigit():
+                return int(v)
+            try:
+                return float(v)
+
+            except ValueError:
+                return v
+
+        return v
 
 
 # OrderingFeilds
