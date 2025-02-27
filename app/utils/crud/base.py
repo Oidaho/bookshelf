@@ -1,7 +1,8 @@
+from datetime import date
 from typing import Generic, Optional, Type, TypeVar, Union
 
 from fastapi import HTTPException, status
-from sqlalchemy import String, asc, desc, select, Column
+from sqlalchemy import Column, String, asc, desc, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -151,7 +152,9 @@ class WithParameterizedListing(BaseCRUD[AlchemyModel]):
         return result.scalars().all()
 
     @staticmethod
-    def __create_condition(column: Column, operator: str, search_value: Union[str, int, float]):
+    def __create_condition(
+        column: Column, operator: str, search_value: Union[str, int, float, date]
+    ):
         if operator == "ILIKE":
             if not isinstance(column.type, String):
                 raise HTTPException(
@@ -164,6 +167,12 @@ class WithParameterizedListing(BaseCRUD[AlchemyModel]):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Cannot use this search mode on non-numeric field",
+            )
+
+        elif operator in ("<", ">", "<=", ">=") and isinstance(search_value, str):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot use this search mode with non-numeric or non-date search value",
             )
 
         return column.op(operator)(search_value)
