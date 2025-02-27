@@ -1,5 +1,5 @@
 from pydantic import BaseModel, field_validator
-from typing import Annotated, Optional, TypeVar, Generic
+from typing import Annotated, Optional, TypeVar, Generic, Union
 from fastapi import Query
 from datetime import date
 from enum import Enum
@@ -15,8 +15,8 @@ class ListingFiltering(BaseModel):
     pass
 
 
-# OrderingFeilds. Имеется в виду Enum
-_OF = TypeVar("_OF")
+# OrderingFeilds
+_OF = TypeVar("_OF", bound=Union[str, Enum])
 
 
 class SortOrder(str, Enum):
