@@ -1,8 +1,9 @@
-from pydantic import BaseModel, field_validator
-from typing import Annotated, Optional, TypeVar, Generic, Union
-from fastapi import Query
-from datetime import date
+from datetime import date, datetime
 from enum import Enum
+from typing import Annotated, Generic, Optional, TypeVar, Union
+
+from fastapi import Query
+from pydantic import BaseModel, field_validator
 
 
 class ListingPagination(BaseModel):
@@ -37,7 +38,7 @@ class ListingSearch(BaseModel, Generic[_SF]):
     search_by: Annotated[Optional[_SF], Query(None, description="Search field")]
     search_mode: Annotated[SearchMode, Query(SearchMode.EQ, description="Search Mode")]
     search_value: Annotated[
-        Optional[Union[str, int, float]], Query(None, description="Search value")
+        Optional[Union[str, int, float, date]], Query(None, description="Search value")
     ]
 
     @field_validator("search_value")
@@ -45,11 +46,14 @@ class ListingSearch(BaseModel, Generic[_SF]):
         if isinstance(v, str):
             if v.isdigit():
                 return int(v)
+
             try:
                 return float(v)
-
             except ValueError:
-                return v
+                try:
+                    return datetime.strptime(v, "%Y-%m-%d").date()
+                except ValueError:
+                    return v
 
         return v
 
