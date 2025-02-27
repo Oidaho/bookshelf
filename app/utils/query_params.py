@@ -1,7 +1,8 @@
 from pydantic import BaseModel, field_validator
-from typing import Annotated, Optional
+from typing import Annotated, Optional, TypeVar, Generic
 from fastapi import Query
 from datetime import date
+from enum import Enum
 
 
 class ListingPagination(BaseModel):
@@ -14,9 +15,18 @@ class ListingFiltering(BaseModel):
     pass
 
 
-class ListingOrdering(BaseModel):
-    # TODO: write me
-    pass
+# OrderingFeilds. Имеется в виду Enum
+_OF = TypeVar("_OF")
+
+
+class SortOrder(str, Enum):
+    ASC = "asc"
+    DESC = "desc"
+
+
+class ListingSort(BaseModel, Generic[_OF]):
+    sort_by: Annotated[Optional[_OF], Query(None, description="Sorting field")]
+    sord_order: Annotated[SortOrder, Query(SortOrder.ASC, description="Sorting order")]
 
 
 class DateSearch(BaseModel):
