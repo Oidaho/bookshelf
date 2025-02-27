@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List
 from uuid import UUID
 
@@ -9,18 +10,31 @@ from schemas.readers import (
     UpdateReader,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
-from utils import ListingPagination
+from utils import ListingPagination, ListingSort, ListingSearch
 from utils.crud import reader
 
 router = APIRouter(prefix="/readers")
 
 
+class SortFields(str, Enum):
+    NAME = "full_name"
+    ADDRESS = "address"
+
+
+class SearchFields(str, Enum):
+    NAME = "full_name"
+    ADDRESS = "address"
+    PHONE = "phone"
+
+
 @router.get("", summary="Get all Readers", tags=["Listing", "Readers"])
 async def get_readers(
+    search: ListingSearch[SearchFields] = Depends(),
+    sort: ListingSort[SortFields] = Depends(),
     pagination: ListingPagination = Depends(),
     db: AsyncSession = Depends(get_db),
 ) -> List[ReaderResponse]:
-    result = await reader.get_all(db, pagination.skip, pagination.limit)
+    result = await reader.get_all(db, search, sort, pagination)
     return [ReaderResponse.model_validate(reader) for reader in result]
 
 

@@ -1,26 +1,45 @@
+from enum import Enum
 from typing import List
 from uuid import UUID
 
 from db import get_db
 from fastapi import APIRouter, Body, Depends
 from schemas.books import (
-    CreateBook,
     BookResponse,
+    CreateBook,
     UpdateBook,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
-from utils import ListingPagination
+from utils import ListingPagination, ListingSort, ListingSearch
 from utils.crud import book
 
 router = APIRouter(prefix="/books")
 
 
+class SortFields(str, Enum):
+    TITLE = "title"
+    YEAR = "publishing_year"
+    PRICE = "price"
+    AMOUNT = "amount"
+
+
+class SearchFields(str, Enum):
+    AUTHOR = "author_code"
+    PUBLISHER = "publisher_code"
+    YEAR = "publishing_year"
+    TITLE = "title"
+    PRICE = "price"
+    AMOUNT = "amount"
+
+
 @router.get("", summary="Get all Books", tags=["Listing", "Books"])
 async def get_books(
+    search: ListingSearch[SearchFields] = Depends(),
+    sort: ListingSort[SortFields] = Depends(),
     pagination: ListingPagination = Depends(),
     db: AsyncSession = Depends(get_db),
 ) -> List[BookResponse]:
-    result = await book.get_all(db, pagination.skip, pagination.limit)
+    result = await book.get_all(db, search, sort, pagination)
     return [BookResponse.model_validate(publisher) for publisher in result]
 
 

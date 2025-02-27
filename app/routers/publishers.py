@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List
 from uuid import UUID
 
@@ -9,18 +10,30 @@ from schemas.publishers import (
     UpdatePublisher,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
-from utils import ListingPagination
+from utils import ListingPagination, ListingSort, ListingSearch
 from utils.crud import publisher
 
 router = APIRouter(prefix="/publishers")
 
 
+class SortFields(str, Enum):
+    NAME = "name"
+    CITY = "city"
+
+
+class SearchFields(str, Enum):
+    NAME = "name"
+    CITY = "city"
+
+
 @router.get("", summary="Get all Publishers", tags=["Listing", "Publishers"])
 async def get_publishers(
+    search: ListingSearch[SearchFields] = Depends(),
+    sort: ListingSort[SortFields] = Depends(),
     pagination: ListingPagination = Depends(),
     db: AsyncSession = Depends(get_db),
 ) -> List[PublisherResponse]:
-    result = await publisher.get_all(db, pagination.skip, pagination.limit)
+    result = await publisher.get_all(db, search, sort, pagination)
     return [PublisherResponse.model_validate(publisher) for publisher in result]
 
 

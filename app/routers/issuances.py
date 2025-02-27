@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List
 from uuid import UUID
 
@@ -9,18 +10,32 @@ from schemas.issuances import (
     UpdateIssuance,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
-from utils import ListingPagination
+from utils import ListingPagination, ListingSort, ListingSearch
 from utils.crud import issuance
 
 router = APIRouter(prefix="/issuances")
 
 
+class SortFields(str, Enum):
+    ISSUANCED = "issuanced_at"
+    EXPIRES = "expires_at"
+
+
+class SearchFields(str, Enum):
+    ISSUANCED = "issuanced_at"
+    EXPIRES = "expires_at"
+    READER = "reader_code"
+    BOOK = "book_code"
+
+
 @router.get("", summary="Get all Issuances", tags=["Listing", "Issuances"])
 async def get_issuances(
+    search: ListingSearch[SearchFields] = Depends(),
+    sort: ListingSort[SortFields] = Depends(),
     pagination: ListingPagination = Depends(),
     db: AsyncSession = Depends(get_db),
 ) -> List[IssuanceResponse]:
-    result = await issuance.get_all(db, pagination.skip, pagination.limit)
+    result = await issuance.get_all(db, search, sort, pagination)
     return [IssuanceResponse.model_validate(publisher) for publisher in result]
 
 
