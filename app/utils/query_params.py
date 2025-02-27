@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field
-from typing import Annotated
+from pydantic import BaseModel, field_validator
+from typing import Annotated, Optional
 from fastapi import Query
 from datetime import date
 
@@ -20,4 +20,9 @@ class ListingOrdering(BaseModel):
 
 
 class DateSearch(BaseModel):
-    date: Annotated[date, Field(default_factory=date.today)]
+    date: Annotated[Optional[str], Query(None, example="2025-02-27")]
+
+    @field_validator("date", mode="before")
+    @classmethod
+    def set_default_date(cls, value: Optional[str]) -> str:
+        return value or date.today().isoformat()
