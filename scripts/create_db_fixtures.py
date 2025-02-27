@@ -85,8 +85,6 @@ async def main():
         Issuance(
             book_code=choice(books).code,
             reader_code=choice(readers).code,
-            issuanced_at=fake.date_between(start_date="-1y", end_date="today"),
-            expires_at=fake.date_between(start_date="today", end_date="+20d"),
         )
         for _ in tqdm(range(NUM_ISSUES))
     ]
