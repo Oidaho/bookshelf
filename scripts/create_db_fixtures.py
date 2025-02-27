@@ -8,10 +8,15 @@ from db import get_db
 from db.models import Author, Publisher, Reader, Book, Issuance  # noqa
 
 
-from faker import Faker
+try:
+    from faker import Faker
+    from tqdm import tqdm
+except ImportError:
+    raise ImportError("Установите --group dev зависимости.")
+
 from random import choice
 from typing import Collection
-from tqdm import tqdm
+
 from random import randint, uniform
 import asyncio
 
