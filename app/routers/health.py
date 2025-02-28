@@ -9,7 +9,7 @@ router = APIRouter()
 
 @router.get(path="/health", summary="Health Check", tags=["Health"])
 async def health_check() -> JSONResponse:
-    """Подтверждает работоспособность сервиса, отправляя данные о текощей хост-системе."""
+    """Подтверждает работоспособность сервиса, отправляя данные о текущей хост-системе."""
     try:
         health_status = {
             "status": "healthy",
