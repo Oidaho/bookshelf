@@ -35,6 +35,7 @@ async def get_issuances(
     pagination: ListingPagination = Depends(),
     db: AsyncSession = Depends(get_db),
 ) -> List[IssuanceResponse]:
+    """Возвращает список всех выдач с возможностью поиска, сортировки и пагинации."""
     result = await issuance.get_all(db, search, sort, pagination)
     return [IssuanceResponse.model_validate(publisher) for publisher in result]
 
@@ -44,6 +45,7 @@ async def get_issuance(
     code: UUID,
     db: AsyncSession = Depends(get_db),
 ) -> IssuanceResponse:
+    """Возвращает данные конкретной выдачи по ее коду."""
     result = await issuance.get(db, code)
     return IssuanceResponse.model_validate(result)
 
@@ -53,6 +55,11 @@ async def create_issuance(
     data: CreateIssuance = Body(),
     db: AsyncSession = Depends(get_db),
 ) -> IssuanceResponse:
+    """Создает новоую выдачу на основе переданных данных.
+    При создании также проверяется существование связанных сущностей.
+    Книга не будет выдана, если читатель уже имеет 5 выдач.
+    Книга не будет выдана, если их не хватает в библиотеке.
+    """
     result = await issuance.create(db, data.model_dump())
     return IssuanceResponse.model_validate(result)
 
@@ -62,6 +69,12 @@ async def delete_issuance(
     code: UUID,
     db: AsyncSession = Depends(get_db),
 ) -> IssuanceResponse:
+    """Удаляет конкретную выдачу по ее коду.
+    Если при удалении у связанного читателя больше не осталось выдач,
+    то он тоже удаляется.
+    При удалении книга возвращается 'на полку', т.е. кол-во экземпляров
+    книги возрастает на 1.
+    """
     result = await issuance.delete(db, code)
     return IssuanceResponse.model_validate(result)
 
@@ -72,5 +85,6 @@ async def update_issuance(
     data: UpdateIssuance = Body(),
     db: AsyncSession = Depends(get_db),
 ) -> IssuanceResponse:
+    """Обновляет данные конкретной выдачи по ее коду."""
     result = await issuance.update(db, code, data.model_dump(exclude_none=True))
     return IssuanceResponse.model_validate(result)

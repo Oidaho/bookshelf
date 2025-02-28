@@ -33,6 +33,7 @@ async def get_publishers(
     pagination: ListingPagination = Depends(),
     db: AsyncSession = Depends(get_db),
 ) -> List[PublisherResponse]:
+    """Возвращает список всех издателей с возможностью поиска, сортировки и пагинации."""
     result = await publisher.get_all(db, search, sort, pagination)
     return [PublisherResponse.model_validate(publisher) for publisher in result]
 
@@ -42,6 +43,7 @@ async def get_publisher(
     code: UUID,
     db: AsyncSession = Depends(get_db),
 ) -> PublisherResponse:
+    """Возвращает данные конкретного издателя по его коду."""
     result = await publisher.get(db, code)
     return PublisherResponse.model_validate(result)
 
@@ -51,6 +53,7 @@ async def create_publisher(
     data: CreatePublisher = Body(),
     db: AsyncSession = Depends(get_db),
 ) -> PublisherResponse:
+    """Создает нового издателя на основе переданных данных."""
     result = await publisher.create(db, data.model_dump())
     return PublisherResponse.model_validate(result)
 
@@ -60,6 +63,7 @@ async def delete_publisher(
     code: UUID,
     db: AsyncSession = Depends(get_db),
 ) -> PublisherResponse:
+    """Удаляет конкретного издателя по его коду."""
     result = await publisher.delete(db, code)
     return PublisherResponse.model_validate(result)
 
@@ -70,5 +74,6 @@ async def update_publisher(
     data: UpdatePublisher = Body(),
     db: AsyncSession = Depends(get_db),
 ) -> PublisherResponse:
+    """Обновляет данные конкретного издателя по его коду."""
     result = await publisher.update(db, code, data.model_dump(exclude_none=True))
     return PublisherResponse.model_validate(result)

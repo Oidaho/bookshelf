@@ -34,6 +34,7 @@ async def get_readers(
     pagination: ListingPagination = Depends(),
     db: AsyncSession = Depends(get_db),
 ) -> List[ReaderResponse]:
+    """Возвращает список всех читателей с возможностью поиска, сортировки и пагинации."""
     result = await reader.get_all(db, search, sort, pagination)
     return [ReaderResponse.model_validate(reader) for reader in result]
 
@@ -43,6 +44,7 @@ async def get_reader(
     code: UUID,
     db: AsyncSession = Depends(get_db),
 ) -> ReaderResponse:
+    """Возвращает данные конкретного читателя по его коду."""
     result = await reader.get(db, code)
     return ReaderResponse.model_validate(result)
 
@@ -52,6 +54,7 @@ async def create_reader(
     data: CreateReader = Body(),
     db: AsyncSession = Depends(get_db),
 ) -> ReaderResponse:
+    """Создает нового читателя на основе переданных данных."""
     result = await reader.create(db, data.model_dump())
     return ReaderResponse.model_validate(result)
 
@@ -61,6 +64,7 @@ async def delete_reader(
     code: UUID,
     db: AsyncSession = Depends(get_db),
 ) -> ReaderResponse:
+    """Удаляет конкретного читателя по его коду."""
     result = await reader.delete(db, code)
     return ReaderResponse.model_validate(result)
 
@@ -71,5 +75,6 @@ async def update_reader(
     data: UpdateReader = Body(),
     db: AsyncSession = Depends(get_db),
 ) -> ReaderResponse:
+    """Обновляет данные конкретного читателя по его коду."""
     result = await reader.update(db, code, data.model_dump(exclude_none=True))
     return ReaderResponse.model_validate(result)

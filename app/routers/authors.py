@@ -31,6 +31,7 @@ async def get_authors(
     pagination: ListingPagination = Depends(),
     db: AsyncSession = Depends(get_db),
 ) -> List[AuthorResponse]:
+    """Возвращает список всех авторов с возможностью поиска, сортировки и пагинации."""
     result = await author.get_all(db, search, sort, pagination)
     return [AuthorResponse.model_validate(author) for author in result]
 
@@ -40,6 +41,7 @@ async def get_publisher(
     code: UUID,
     db: AsyncSession = Depends(get_db),
 ) -> AuthorResponse:
+    """Возвращает данные конкретного автора по его коду."""
     result = await author.get(db, code)
     return AuthorResponse.model_validate(result)
 
@@ -49,6 +51,7 @@ async def create_publisher(
     data: CreateAuthor = Body(),
     db: AsyncSession = Depends(get_db),
 ) -> AuthorResponse:
+    """Создает нового автора на основе переданных данных."""
     result = await author.create(db, data.model_dump())
     return AuthorResponse.model_validate(result)
 
@@ -58,6 +61,7 @@ async def delete_publisher(
     code: UUID,
     db: AsyncSession = Depends(get_db),
 ) -> AuthorResponse:
+    """Удаляет конкретного автора по его коду."""
     result = await author.delete(db, code)
     return AuthorResponse.model_validate(result)
 
@@ -68,5 +72,6 @@ async def update_publisher(
     data: UpdateAuthor = Body(),
     db: AsyncSession = Depends(get_db),
 ) -> AuthorResponse:
+    """Обновляет данные конкретного автора по его коду."""
     result = await author.update(db, code, data.model_dump(exclude_none=True))
     return AuthorResponse.model_validate(result)

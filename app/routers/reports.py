@@ -16,6 +16,9 @@ async def get_readers(
     search: DateSearch = Depends(),
     db: AsyncSession = Depends(get_db),
 ):
+    """Создает отчет об удержаных книгах по каждому читателю и по библиотеке в целом.
+    Отправляет отчет в виде стрима флайла формата xslx. (Загрузка файла Excel)
+    """
     report_date = datetime.strptime(search.date, "%Y-%m-%d")
     expired_issuances = await issuance.get_all(
         db,
@@ -45,9 +48,11 @@ async def get_readers(
         ]
         data[reader.code]["books"].append(issuance_data)
 
+    # * Создание отчета
     report = ExpiredIssuancesReport(report_date)
     report.construct_report(data)
 
+    # * Стриминг файла в качестве ответа (Загрузка )
     return StreamingResponse(
         report.get_filestream(),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

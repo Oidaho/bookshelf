@@ -39,6 +39,7 @@ async def get_books(
     pagination: ListingPagination = Depends(),
     db: AsyncSession = Depends(get_db),
 ) -> List[BookResponse]:
+    """Возвращает список всех кнги с возможностью поиска, сортировки и пагинации."""
     result = await book.get_all(db, search, sort, pagination)
     return [BookResponse.model_validate(publisher) for publisher in result]
 
@@ -48,6 +49,7 @@ async def get_book(
     code: UUID,
     db: AsyncSession = Depends(get_db),
 ) -> BookResponse:
+    """Возвращает данные конкретной книге по ее коду."""
     result = await book.get(db, code)
     return BookResponse.model_validate(result)
 
@@ -57,6 +59,9 @@ async def create_book(
     data: CreateBook = Body(),
     db: AsyncSession = Depends(get_db),
 ) -> BookResponse:
+    """Создает новоую книгу на основе переданных данных.
+    При создании также проверяется существование связанных сущностей.
+    """
     result = await book.create(db, data.model_dump())
     return BookResponse.model_validate(result)
 
@@ -66,6 +71,10 @@ async def delete_book(
     code: UUID,
     db: AsyncSession = Depends(get_db),
 ) -> BookResponse:
+    """Удаляет конкретную книгу по ее коду.
+    Если при удалении книги связанный автор и\или издательство
+    больше не имеют кнги - они удаляются.
+    """
     result = await book.delete(db, code)
     return BookResponse.model_validate(result)
 
@@ -76,5 +85,6 @@ async def update_book(
     data: UpdateBook = Body(),
     db: AsyncSession = Depends(get_db),
 ) -> BookResponse:
+    """Обновляет данные конкретной выдачи по ее коду."""
     result = await book.update(db, code, data.model_dump(exclude_none=True))
     return BookResponse.model_validate(result)
