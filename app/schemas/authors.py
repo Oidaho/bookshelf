@@ -17,6 +17,7 @@ class CreateAuthor(BaseModel):
     @field_validator("name", mode="after")
     @classmethod
     def after_validate_name(cls, name: str) -> str:
+        """Исправляет регистр имени, приводя его к .title()"""
         return name.lower().title()
 
 

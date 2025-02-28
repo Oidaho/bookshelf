@@ -24,6 +24,7 @@ class CreateReader(BaseModel):
     @field_validator("full_name", mode="after")
     @classmethod
     def after_validate_full_name(cls, name: str) -> str:
+        """Исправляет регистр имени, приводя его к .title()"""
         return name.lower().title()
 
 
